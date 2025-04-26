@@ -1,6 +1,9 @@
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import s from './ContactForm.module.css';
+import { useDispatch } from 'react-redux';
+import { addContact } from '../../redux/contactsSlice';
+import { useId } from 'react';
 import { nanoid } from 'nanoid';
 
 const initialValues = {
@@ -14,21 +17,26 @@ const FeedbackSchema = Yup.object().shape({
     .max(50, 'Too Long!')
     .required('Required'),
   number: Yup.string()
-    .min(3, 'Too Short!')
-    .max(50, 'Too Long!')
+    .min(7, 'Too Short!')
+    .max(15, 'Too Long!')
     .required('Required'),
 });
 
-const ContactForm = ({ handleAddContact }) => {
-  const nameFieldId = nanoid();
-  const numberFieldId = nanoid();
+const ContactForm = () => {
+  const dispatch = useDispatch();
+
+  const nameFieldId = useId();
+  const numberFieldId = useId();
 
   const handleSubmit = (values, actions) => {
-    handleAddContact({
-      id: crypto.randomUUID(),
-      name: values.name,
-      number: values.number,
-    });
+    dispatch(
+      addContact({
+        id: nanoid(),
+        name: values.name,
+        number: values.number,
+      }),
+    );
+
     actions.resetForm();
   };
 
@@ -38,36 +46,47 @@ const ContactForm = ({ handleAddContact }) => {
       onSubmit={handleSubmit}
       validationSchema={FeedbackSchema}
     >
-      <Form className={s.form}>
-        <div className={s.form_item}>
-          <label htmlFor={nameFieldId}>Name</label>
-          <Field className={s.field} type="text" name="name" id={nameFieldId} />
-          <ErrorMessage
-            name="name"
-            component="span"
-            className={s.form_item_error}
-          />
-        </div>
+      {({ isValid, dirty }) => (
+        <Form className={s.form}>
+          <div className={s.form_item}>
+            <label htmlFor={nameFieldId}>Name</label>
+            <Field
+              className={s.field}
+              type="text"
+              name="name"
+              id={nameFieldId}
+            />
+            <ErrorMessage
+              name="name"
+              component="span"
+              className={s.form_item_error}
+            />
+          </div>
 
-        <div className={s.form_item}>
-          <label htmlFor={numberFieldId}>Number</label>
-          <Field
-            className={s.field}
-            type="text"
-            name="number"
-            id={numberFieldId}
-          />
-          <ErrorMessage
-            name="number"
-            component="span"
-            className={s.form_item_error}
-          />
-        </div>
+          <div className={s.form_item}>
+            <label htmlFor={numberFieldId}>Number</label>
+            <Field
+              className={s.field}
+              type="text"
+              name="number"
+              id={numberFieldId}
+            />
+            <ErrorMessage
+              name="number"
+              component="span"
+              className={s.form_item_error}
+            />
+          </div>
 
-        <button className={s.form_btn_submit} type="submit">
-          Add contact
-        </button>
-      </Form>
+          <button
+            className={s.form_btn_submit}
+            type="submit"
+            disabled={!(isValid && dirty)}
+          >
+            Add contact
+          </button>
+        </Form>
+      )}
     </Formik>
   );
 };

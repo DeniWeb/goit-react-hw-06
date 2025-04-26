@@ -1,1 +1,1 @@
-goit-react-hw-03
+Go-it React Hw 6 Deni S
